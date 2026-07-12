@@ -103,6 +103,22 @@
     wireWhatsAppLinks();
     initScrollReveal();
     const yearEl = $('#year'); if (yearEl) yearEl.textContent = new Date().getFullYear();
+    checkUrlForProduct();
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.pid) {
+        openProduct(e.state.pid, true);
+      } else {
+        closeProduct(true);
+      }
+    });
+  }
+
+  function checkUrlForProduct() {
+    const params = new URLSearchParams(window.location.search);
+    const pid = params.get('p');
+    if (pid && byId[pid]) {
+      openProduct(pid, true);
+    }
   }
 
   async function loadData() {
@@ -284,9 +300,14 @@
     });
   }
 
-  function openProduct(id) {
+  function openProduct(id, skipState = false) {
     const p = byId[id];
     if (!p) return;
+    if (!skipState) {
+      const url = new URL(window.location);
+      url.searchParams.set('p', id);
+      window.history.pushState({ pid: id }, '', url);
+    }
     current = p;
     curQty = 1;
     curCustomFile = null;
@@ -451,7 +472,7 @@
     msg += `• ${current.name}`;
     if (variant) msg += ` (${variantType}: ${variant})`;
     msg += `\n   Qty: ${curQty} × ${money(price)} = ${money(price * curQty)}\n`;
-    msg += `   Link: ${window.location.href.split('#')[0]}\n`;
+    msg += `   Link: ${window.location.origin + window.location.pathname + '?p=' + current.id}\n`;
     if (curCustomFile) msg += `   ✎ I have a custom photo / reference image for this.\n`;
     msg += `\nSubtotal: ${money(price * curQty)}\n`;
     msg += `Making & Delivery: ${SETTINGS.processingDays[0]}–${SETTINGS.processingDays[1]} days\n`;
@@ -466,7 +487,12 @@
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
 
-  function closeProduct() {
+  function closeProduct(skipState = false) {
+    if (skipState !== true && $('#product-modal').classList.contains('open')) {
+      const url = new URL(window.location);
+      url.searchParams.delete('p');
+      window.history.pushState({}, '', url);
+    }
     $('#pd-overlay').classList.remove('open');
     $('#product-modal').classList.remove('open');
     $('#product-modal').setAttribute('aria-hidden', 'true');
@@ -598,7 +624,7 @@
       msg += `${i + 1}. ${item.name}`;
       if (item.variant) msg += ` (${item.variantType}: ${item.variant})`;
       msg += `\n   Qty: ${item.qty} × ${money(item.unitPrice)} = ${money(line)}\n`;
-      msg += `   Link: ${window.location.href.split('#')[0]}\n`;
+      msg += `   Link: ${window.location.origin + window.location.pathname + '?p=' + item.productId}\n`;
       if (item.custom) { anyCustom = true; msg += `   ✎ Custom photo/design attached\n`; }
       msg += '\n';
     });
