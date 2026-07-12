@@ -353,7 +353,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 @media (min-width: 768px) {
   .hero-circle {
-    animation-duration: 12s;
+    animation: none;
   }
 }
 @keyframes floatAnim {
