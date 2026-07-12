@@ -350,6 +350,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   transition: box-shadow 0.5s var(--ease);
   animation: floatAnim 6s ease-in-out infinite;
 }
+
+@media (min-width: 768px) {
+  .hero-circle {
+    animation-duration: 12s;
+  }
+}
 @keyframes floatAnim {
   0% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
