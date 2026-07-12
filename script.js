@@ -734,7 +734,6 @@
 
   function initHeroAnimation() {
     const heroArea = document.querySelector('.hero-area');
-    const heroCircle = document.querySelector('.hero-circle');
     const header = $('#header');
     if (!heroArea) return;
 
