@@ -969,7 +969,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .sticky-amount { font-size: 1.05rem; font-weight: 700; }
 .sticky-actions { display: flex; gap: 0.5rem; align-items: center; flex: 1; justify-content: flex-end; }
 .sticky-wa-btn { padding: 0.7rem 1rem; font-size: 0.8rem; flex: 1; max-width: 180px; border-radius: var(--radius-sm); }
-.sticky-add-btn { padding: 0.7rem 1rem; font-size: 0.8rem; background: var(--surface-2); color: var(--text); box-shadow: none; border: 1px solid var(--border-mid); border-radius: var(--radius-sm); }
+.sticky-add-btn { padding: 0.7rem 1rem; font-size: 0.8rem; background: var(--surface-2); color: var(--text); box-shadow: none; border: 1px solid var(--border-mid); border-radius: var(--radius-sm); flex: 1; text-align: center; }
 
 /* LIGHTBOX */
 .lightbox {
@@ -1062,7 +1062,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   .card-title { font-size: 0.8rem; }
   .sticky-buy-bar { display: flex; }
   .pd-info { padding-bottom: 8rem; }
-  .pd-actions .pd-add-btn { display: none; }
+  .pd-actions .pd-add-btn { flex: 1; display: flex; justify-content: center; }
   .pd-actions .pd-order-wa-btn { min-width: unset; }
 
   /* Curated rail: slightly smaller cards, more padding for swipe */
