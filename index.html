@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Crafting Tales by Vaishnavi — custom resin art and floral preservation. Preserving the moments you never want to let go of." />
+  <title>Crafting Tales by Vaishnavi — Resin Art & Floral Preservation</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C69C6D' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9z'/%3E%3Cpath d='M12 22c-4.97 0-9-4.03-9-9 4.97 0 9 4.03 9 9z'/%3E%3Cpath d='M12 2c4.97 0 9 4.03 9 9-4.97 0-9-4.03-9-9z'/%3E%3Cpath d='M12 2c-4.97 0-9 4.03-9 9 4.97 0 9-4.03 9-9z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="style.css?v=4" />
+</head>
+<body>
+
+  <!-- ============ BRAND SIDEBAR (fixed, dark espresso) ============ -->
+  <aside class="brand-sidebar" id="brand-sidebar">
+    <span class="brand-sidebar-text">CRAFTING TALES BY VAISHNAVI</span>
+  </aside>
+
+  <!-- ============ HEADER ============ -->
+  <header class="header" id="header">
+    <a href="#top" class="mobile-brand">CRAFTING TALES BY VAISHNAVI</a>
+    <nav class="nav-links">
+      <a href="#shop">Shop</a>
+      <a href="#craft">The Craft</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="wishlist-toggle-btn" aria-label="Open wishlist">
+        <span class="badge" id="wishlist-count" hidden>0</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+      </button>
+      <button class="icon-btn" id="theme-toggle-btn" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="icon-sun" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <button class="icon-btn" id="cart-toggle-btn" aria-label="Open cart">
+        <span class="badge" id="cart-count" hidden>0</span>
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ CONTENT WRAPPER ============ -->
+  <div class="content-wrapper">
+    <main class="main-sheet" id="top">
+
+      <!-- HERO: circular video + tagline -->
+      <div class="hero-area" id="hero">
+        <div class="hero-visual">
+          <div class="hero-circle">
+            <img id="hero-image" src="products/Full varmala preservation/IMG-20260705-WA0054.jpg" alt="Hero Image" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;">
+          </div>
+        </div>
+        <div class="hero-body">
+          <p class="hero-eyebrow">Handcrafted Resin Art</p>
+          <h1 class="hero-tagline">Preserving the moments you never want to let go of</h1>
+          <a href="#shop" class="hero-cta">Explore the Collection <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+
+
+      <!-- CURATED SELECTION -->
+      <div class="scrapbook-heading">
+        <h2 class="scrapbook-title">CURATED</h2>
+      </div>
+      <section class="section curated-section scrapbook-paper">
+        <div class="editorial-row">
+          <div class="editorial-label">
+            <p class="editorial-sublabel" style="margin-top: 0;">A handful of favourites &mdash; the pieces people reach for first.</p>
+          </div>
+          <div class="curated-rail" id="curated-rail"><!-- injected by JS --></div>
+        </div>
+      </section>
+
+      <!-- HANDMADE CATALOG -->
+      <div class="scrapbook-heading" id="shop">
+        <h2 class="scrapbook-title">HANDMADE</h2>
+      </div>
+      <section class="section catalog-section scrapbook-paper">
+        <div class="editorial-row editorial-row--catalog">
+          <p class="editorial-desc" style="margin-top: 0; max-width: 600px;">Every piece is cast by hand in layers of crystal-clear epoxy resin &mdash; no two are ever quite alike. Browse the full collection and find something made for exactly this moment.</p>
+        </div>
+        <div class="catalog-controls">
+          <div class="filter-links" id="filter-links"><!-- injected --></div>
+          <div class="sort-wrap">
+            <label for="sort-select" class="sort-label">Sort</label>
+            <select id="sort-select" class="sort-select">
+              <option value="featured">Featured</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name">Name: A–Z</option>
+            </select>
+          </div>
+        </div>
+        <div class="product-grid" id="product-grid"><!-- injected --></div>
+        <p class="empty-state" id="empty-state" hidden>No pieces in this category yet.</p>
+      </section>
+
+      <!-- THE CRAFT -->
+      <div class="scrapbook-heading" id="craft">
+        <h2 class="scrapbook-title">THE CRAFT</h2>
+      </div>
+      <section class="section craft-section scrapbook-paper">
+        <div class="craft-grid">
+          <div class="craft-copy">
+            <p>Every piece begins with something you never want to forget &mdash; a wedding varmala, a handwritten letter, a first bloom. It&rsquo;s cleaned, arranged by hand, and set in layers of crystal-clear epoxy resin that cure over days, not minutes.</p>
+            <p>Nothing here is mass-produced. Colours shift, petals settle, and each cast carries the small imperfections that prove a human made it &mdash; for you.</p>
+            <!-- INSTAGRAM BANNER -->
+            <a href="https://instagram.com/crafting_tales_by_vaishnavi" target="_blank" rel="noopener" class="ig-banner" style="margin: 2rem 0 0 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              <span>Explore the latest collection on Instagram</span>
+            </a>
+          </div>
+          <div class="craft-media">
+            <video autoplay muted loop playsinline poster="products/resin geode clock/IMG-20260705-WA0035.jpg">
+              <source src="products/resin_pour.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="footer" id="contact">
+        <div class="footer-inner">
+          <div class="footer-brand">
+            <h3>Crafting Tales by Vaishnavi</h3>
+            <p>Preserving the moments you never want to let go of.</p>
+          </div>
+          <div class="footer-cols">
+            <div class="footer-col">
+              <span class="footer-heading">Explore</span>
+              <a href="#shop">Shop</a>
+              <a href="#craft">The Craft</a>
+            </div>
+            <div class="footer-col">
+              <span class="footer-heading">Order</span>
+              <a href="#" id="footer-whatsapp">WhatsApp us</a>
+              <a href="mailto:hello@craftbyvaishnavi.com">Email</a>
+            </div>
+            <div class="footer-col footer-socials">
+              <span class="footer-heading">Follow</span>
+              <div class="social-row">
+                <a href="#" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+                <a href="#" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="footer-legal">&copy; <span id="year"></span> Crafting Tales by Vaishnavi. Handmade, one piece at a time.</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ============ CART DRAWER ============ -->
+  <div class="overlay" id="cart-overlay"></div>
+  <aside class="drawer cart-drawer" id="cart-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <h2>Your Cart</h2>
+      <button class="drawer-close" id="cart-close-btn" aria-label="Close cart">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body cart-items" id="cart-items"><!-- injected --></div>
+    <div class="drawer-footer cart-footer" id="cart-footer">
+      <div class="estimates">
+        <div class="estimate">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>
+          <div><p class="estimate-label">Making & Delivery</p><p class="estimate-val" id="est-processing">—</p></div>
+        </div>
+      </div>
+      <div class="subtotal-row">
+        <span>Subtotal (<span id="cart-item-count">0</span> items)</span>
+        <span class="subtotal-price" id="cart-subtotal">₹0</span>
+      <button class="btn-primary checkout-btn" id="checkout-btn">
+        Checkout via WhatsApp
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.262 2 2 6.262 2 11.5c0 1.694.447 3.282 1.227 4.664L2 22l5.979-1.207A9.432 9.432 0 0011.5 21c5.238 0 9.5-4.262 9.5-9.5S16.738 2 11.5 2zm0 17.318c-1.47 0-2.852-.404-4.043-1.107l-.29-.173-3.01.607.633-2.944-.19-.302A7.47 7.47 0 014 11.5C4 7.364 7.364 4 11.5 4S19 7.364 19 11.5 15.636 19.318 11.5 19.318z"/></svg>
+      </button>
+      <p class="fine-print">Shipping calculated during checkout</p>
+    </div>
+  </aside>
+
+  <!-- ============ WISHLIST DRAWER ============ -->
+  <div class="overlay" id="wishlist-overlay"></div>
+  <aside class="drawer wishlist-drawer" id="wishlist-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <h2>Wishlist</h2>
+      <button class="drawer-close" id="wishlist-close-btn" aria-label="Close wishlist">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body wishlist-items" id="wishlist-items"><!-- injected --></div>
+  </aside>
+
+  <!-- ============ PRODUCT DETAIL MODAL ============ -->
+  <div class="overlay pd-overlay" id="pd-overlay"></div>
+  <div class="product-modal" id="product-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <button class="pd-close" id="pd-close-btn" aria-label="Close">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="pd-body">
+      <!-- Gallery -->
+      <div class="pd-gallery">
+        <div class="pd-stage" id="pd-stage"><!-- main image/video injected --></div>
+        <div class="pd-thumbs" id="pd-thumbs"><!-- injected --></div>
+      </div>
+      <!-- Info -->
+      <div class="pd-info">
+        <div class="pd-heading">
+          <span class="pd-badge" id="pd-badge" hidden></span>
+          <h1 class="pd-title" id="pd-title"></h1>
+          <p class="pd-price" id="pd-price"></p>
+        </div>
+
+        <div class="pd-field" id="pd-variant-field" hidden>
+          <label class="field-label" id="pd-variant-label">Size</label>
+          <!-- chips for Design/Color variants, select dropdown for Size variants -->
+          <div class="pd-variant-options" id="pd-variant-options"><!-- injected --></div>
+        </div>
+
+        <div class="pd-field" id="pd-custom-field" hidden>
+          <label class="field-label" id="pd-custom-label" for="pd-custom-file">Personalise this piece</label>
+          <div class="upload-box" id="pd-upload-box">
+            <input type="file" id="pd-custom-file" accept="image/*" hidden />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <span id="pd-upload-text">Upload your photo (optional)</span>
+          </div>
+        </div>
+
+        <div class="pd-field pd-qty-field">
+          <label class="field-label">Quantity</label>
+          <div class="qty-selector">
+            <button class="qty-btn" id="pd-qty-minus" aria-label="Decrease">−</button>
+            <input type="text" class="qty-input" id="pd-qty-input" value="1" readonly />
+            <button class="qty-btn" id="pd-qty-plus" aria-label="Increase">+</button>
+          </div>
+        </div>
+
+        <div class="pd-actions">
+          <button class="btn-primary pd-order-wa-btn" id="pd-order-wa-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.262 2 2 6.262 2 11.5c0 1.694.447 3.282 1.227 4.664L2 22l5.979-1.207A9.432 9.432 0 0011.5 21c5.238 0 9.5-4.262 9.5-9.5S16.738 2 11.5 2zm0 17.318c-1.47 0-2.852-.404-4.043-1.107l-.29-.173-3.01.607.633-2.944-.19-.302A7.47 7.47 0 014 11.5C4 7.364 7.364 4 11.5 4S19 7.364 19 11.5 15.636 19.318 11.5 19.318z"/></svg>
+            Order on WhatsApp
+          </button>
+
+          <button class="btn-primary pd-add-btn" id="pd-add-btn" style="background:var(--surface-2);color:var(--text);box-shadow:none;border:1px solid var(--border);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            Add to Cart
+          </button>
+          <button class="btn-ghost pd-wish-btn" id="pd-wish-btn" aria-label="Save to wishlist">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          </button>
+        </div>
+
+        <div class="pd-tabs">
+          <div class="pd-tab-headers">
+            <button class="pd-tab-btn active" data-tab="desc">Description</button>
+            <button class="pd-tab-btn" data-tab="specs">Specifications</button>
+            <button class="pd-tab-btn" data-tab="faq">FAQ</button>
+          </div>
+          <div class="pd-tab-panel active" data-panel="desc"><p id="pd-desc"></p></div>
+          <div class="pd-tab-panel" data-panel="specs"><table class="specs-table" id="pd-specs"></table></div>
+          <div class="pd-tab-panel" data-panel="faq">
+            <p><strong>Is every piece unique?</strong> Yes — each is handmade, so colours and floral arrangement vary slightly from the photos.</p>
+            <p><strong>How do I send my flowers/photo?</strong> Place the order on WhatsApp and we'll guide you through sending your materials.</p>
+          </div>
+        </div>
+
+        <div class="pd-estimates">
+          <div class="estimate">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 22h14M5 2h14M17 22v-4.17a2 2 0 00-.59-1.42L12 12l-4.41 4.41A2 2 0 007 17.83V22M7 2v4.17a2 2 0 00.59 1.42L12 12l4.41-4.41A2 2 0 0017 6.17V2"/></svg>
+            <div><p class="estimate-label">Making & Delivery</p><p class="estimate-val">15–20 days</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile sticky buy bar (inside modal) -->
+    <div class="sticky-buy-bar" id="sticky-buy-bar">
+      <div class="sticky-price">
+        <span class="sticky-name" id="sticky-name"></span>
+        <span class="sticky-amount" id="sticky-amount"></span>
+      </div>
+      <div class="sticky-actions">
+        <button class="btn-primary sticky-wa-btn" id="sticky-wa-btn" aria-label="Order on WhatsApp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.262 2 2 6.262 2 11.5c0 1.694.447 3.282 1.227 4.664L2 22l5.979-1.207A9.432 9.432 0 0011.5 21c5.238 0 9.5-4.262 9.5-9.5S16.738 2 11.5 2zm0 17.318c-1.47 0-2.852-.404-4.043-1.107l-.29-.173-3.01.607.633-2.944-.19-.302A7.47 7.47 0 014 11.5C4 7.364 7.364 4 11.5 4S19 7.364 19 11.5 15.636 19.318 11.5 19.318z"/></svg>
+        </button>
+
+        <button class="btn-primary sticky-add-btn" id="sticky-add-btn">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox for full-screen media -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="lightbox-content" id="lightbox-content"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="script.js?v=3"></script>
+</body>
+</html>
