@@ -53,15 +53,12 @@
   function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
   function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
   function $(sel, root = document) { return root.querySelector(sel); }
-  function url(src) { 
-    if (!src) return '';
-    if (String(src).startsWith('http')) return src;
-    return encodeURI(src); 
-  }
+  function url(src) { return encodeURI(src); }
   function money(n) { return SETTINGS.currency + Number(n).toLocaleString('en-IN'); }
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
   function priceRange(p) {
+    if (p.variants && p.variants.options.some(o => typeof o.price === 'number')) {
       const prices = p.variants.options.map(o => (typeof o.price === 'number' ? o.price : p.price));
       const min = Math.min(...prices), max = Math.max(...prices);
       return { min, max, varies: min !== max };
