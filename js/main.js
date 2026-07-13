@@ -123,15 +123,38 @@
 
   async function loadData() {
     try {
-      const res = await fetch('data/products.json', { cache: 'no-store' });
-      if (!res.ok) throw new Error('bad status');
-      const json = await res.json();
-      if (json && Array.isArray(json.products)) {
-        DATA = json; SETTINGS = json.settings || SETTINGS; PRODUCTS = json.products;
-      }
+      if (typeof sb === 'undefined') throw new Error('supabase client not loaded');
+
+      const [productsRes, categoriesRes, settingsRes] = await Promise.all([
+        sb.from('products').select('data').eq('status', 'active').order('sort_order'),
+        sb.from('categories').select('slug,label').order('sort_order'),
+        sb.from('site_settings').select('*').eq('id', 1).single()
+      ]);
+
+      if (productsRes.error) throw productsRes.error;
+      if (categoriesRes.error) throw categoriesRes.error;
+      if (settingsRes.error) throw settingsRes.error;
+
+      const products = productsRes.data.map(row => row.data);
+      const categories = categoriesRes.data;
+      const s = settingsRes.data;
+
+      DATA = {
+        settings: {
+          whatsapp: s.whatsapp,
+          instagram: s.instagram,
+          currency: s.currency,
+          processingDays: [s.processing_days_min, s.processing_days_max],
+          deliveryDays: [s.delivery_days_min, s.delivery_days_max]
+        },
+        categories,
+        products
+      };
+      SETTINGS = DATA.settings;
+      PRODUCTS = DATA.products;
     } catch (e) {
-      // file:// or missing config — silently use inlined fallback.
-      console.info('[Craft] Using inlined product data (config fetch unavailable).');
+      // Supabase unreachable/misconfigured — silently use inlined fallback.
+      console.info('[Craft] Using inlined product data (Supabase fetch unavailable).', e);
     }
   }
 

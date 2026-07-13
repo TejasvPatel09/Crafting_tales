@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Crafting Tales</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body { background:var(--surface-2,#f5f1ea); padding:2rem; }
+    .admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+    .admin-header h1 { font-size:1.4rem; margin:0; }
+    .admin-actions { display:flex; gap:.75rem; }
+    .btn { padding:.55rem 1rem; border-radius:8px; border:1px solid var(--border,#ddd); background:var(--surface,#fff); cursor:pointer; font-size:.9rem; }
+    .btn-primary { background:var(--accent,#C69C6D); color:#fff; border-color:transparent; }
+    table { width:100%; border-collapse:collapse; background:var(--surface,#fff); border-radius:10px; overflow:hidden; }
+    th, td { text-align:left; padding:.7rem 1rem; border-bottom:1px solid var(--border,#eee); font-size:.9rem; }
+    th { background:var(--surface-2,#f5f1ea); font-weight:600; }
+    tr:last-child td { border-bottom:none; }
+    .thumb { width:44px; height:44px; object-fit:cover; border-radius:6px; }
+    .pill { display:inline-block; padding:.15rem .55rem; border-radius:999px; font-size:.75rem; }
+    .pill-active { background:#e6f4ea; color:#1e7b34; }
+    .pill-draft { background:#f1eee6; color:#8a7a5a; }
+    .pill-sold { background:#fbe4e4; color:#b33636; }
+    .row-actions button { margin-right:.4rem; font-size:.8rem; padding:.35rem .6rem; }
+
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:100; }
+    .overlay.open { display:block; }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--surface,#fff); width:min(640px,92vw); max-height:88vh; overflow-y:auto; border-radius:12px; padding:1.75rem; z-index:101; display:none; }
+    .modal.open { display:block; }
+    .modal h2 { margin-top:0; font-size:1.2rem; }
+    .field { margin-bottom:1rem; }
+    .field label { display:block; font-size:.85rem; margin-bottom:.35rem; font-weight:600; }
+    .field input, .field select, .field textarea { width:100%; padding:.55rem .7rem; border:1px solid var(--border,#ddd); border-radius:8px; font-size:.9rem; font-family:inherit; }
+    .field textarea { min-height:80px; font-family:monospace; font-size:.8rem; }
+    .field-row { display:flex; gap:1rem; }
+    .field-row .field { flex:1; }
+    .checkbox-field { display:flex; align-items:center; gap:.5rem; }
+    .checkbox-field input { width:auto; }
+    .media-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:.5rem; }
+    .media-item { position:relative; width:70px; height:70px; }
+    .media-item img, .media-item video { width:100%; height:100%; object-fit:cover; border-radius:6px; }
+    .media-item button { position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; border:0; background:#c0392b; color:#fff; font-size:.7rem; cursor:pointer; line-height:1; }
+    .upload-status { font-size:.8rem; color:var(--text-muted,#888); margin-top:.35rem; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:.6rem; margin-top:1.5rem; }
+    .form-error { color:#c0392b; font-size:.85rem; margin-bottom:.75rem; }
+  </style>
+</head>
+<body>
+  <div class="admin-header">
+    <h1>Products</h1>
+    <div class="admin-actions">
+      <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
+      <button class="btn" id="logout-btn">Log out</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Featured</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody id="product-rows"></tbody>
+  </table>
+
+  <!-- Edit/Add modal -->
+  <div class="overlay" id="modal-overlay"></div>
+  <div class="modal" id="product-modal">
+    <h2 id="modal-title">Add Product</h2>
+    <p class="form-error" id="form-error"></p>
+    <form id="product-form">
+      <div class="field">
+        <label>Product ID (slug, cannot be changed after creation)</label>
+        <input type="text" id="f-id" required pattern="[a-z0-9-]+" placeholder="e.g. resin-toran" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" id="f-name" required />
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="f-category" required></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Price (₹)</label>
+          <input type="number" id="f-price" required min="0" step="1" />
+        </div>
+        <div class="field">
+          <label>Badge (optional)</label>
+          <input type="text" id="f-badge" placeholder="e.g. Bestseller" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="f-description" required style="font-family:inherit;font-size:.9rem;"></textarea>
+      </div>
+      <div class="field">
+        <label>Specs (one "Label: Value" per line)</label>
+        <textarea id="f-specs" placeholder="Size: 10 inch&#10;Material: Crystal-clear epoxy resin"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field checkbox-field">
+          <input type="checkbox" id="f-featured" />
+          <label for="f-featured" style="margin:0;">Featured</label>
+        </div>
+        <div class="field checkbox-field">
+          <input type="checkbox" id="f-customizable" />
+          <label for="f-customizable" style="margin:0;">Customizable</label>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="f-status">
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="sold">Sold</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="custom-label-field" hidden>
+        <label>Customisation prompt</label>
+        <input type="text" id="f-custom-label" placeholder="e.g. Reference photo of your flowers" />
+      </div>
+      <div class="field">
+        <label>Images &amp; Videos</label>
+        <div class="media-list" id="media-list"></div>
+        <input type="file" id="f-media-upload" accept="image/*,video/*" multiple />
+        <p class="upload-status" id="upload-status"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" id="cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js?v=3"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-products.js"></script>
+</body>
+</html>
