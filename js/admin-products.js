@@ -128,19 +128,21 @@
     const statusEl = document.getElementById('upload-status');
     const productId = document.getElementById('f-id').value.trim() || 'unassigned';
 
+    let successCount = 0;
     for (const file of files) {
       statusEl.textContent = `Uploading ${file.name}…`;
       const path = `${productId}/${Date.now()}-${file.name}`;
       const { error } = await sb.storage.from('products').upload(path, file);
       if (error) {
-        statusEl.textContent = `Failed to upload ${file.name}: ${error.message}`;
+        alert(`Failed to upload ${file.name}: ${error.message}`);
         continue;
       }
       const { data: { publicUrl } } = sb.storage.from('products').getPublicUrl(path);
       mediaItems.push({ type: file.type.startsWith('video') ? 'video' : 'image', src: publicUrl });
       renderMediaList();
+      successCount++;
     }
-    statusEl.textContent = `Uploaded ${files.length} file(s).`;
+    statusEl.textContent = `Successfully uploaded ${successCount} of ${files.length} file(s).`;
     e.target.value = '';
   }
 
