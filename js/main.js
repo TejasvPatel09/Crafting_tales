@@ -53,7 +53,7 @@
   function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
   function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
   function $(sel, root = document) { return root.querySelector(sel); }
-  function url(src) { return encodeURI(src); }
+  function url(src) { return src.startsWith('http') ? src : encodeURI(src); }
   function money(n) { return SETTINGS.currency + Number(n).toLocaleString('en-IN'); }
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
