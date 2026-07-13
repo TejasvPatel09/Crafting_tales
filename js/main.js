@@ -54,7 +54,8 @@
   function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
   function $(sel, root = document) { return root.querySelector(sel); }
   function url(src) { 
-    if (src.startsWith('http')) return src;
+    if (!src) return '';
+    if (String(src).startsWith('http')) return src;
     return encodeURI(src); 
   }
   function money(n) { return SETTINGS.currency + Number(n).toLocaleString('en-IN'); }
