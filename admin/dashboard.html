@@ -21,6 +21,19 @@
     .pill-active { background:#e6f4ea; color:#1e7b34; }
     .pill-draft { background:#f1eee6; color:#8a7a5a; }
     .pill-sold { background:#fbe4e4; color:#b33636; }
+    .pill-delisted { background:#e8e8e8; color:#777; }
+    /* Drag-to-reorder */
+    .drag-handle { cursor:grab; color:#bbb; padding:0 .5rem; font-size:1.1rem; user-select:none; }
+    .drag-handle:active { cursor:grabbing; }
+    tr.drag-over td { background:#fdf3e3; border-top:2px solid var(--accent,#C69C6D); }
+    tr[draggable="true"] { transition: opacity .15s; }
+    tr.dragging { opacity:.4; }
+    /* Delist button */
+    .btn-delist { background:#fff3cd; color:#856404; border-color:#ffc107; }
+    .btn-delist:hover { background:#ffe694; }
+    /* Order save toast */
+    #order-toast { font-size:.82rem; color:#1e7b34; background:#e6f4ea; border:1px solid #b7dfbf; padding:.3rem .75rem; border-radius:6px; display:none; }
+    #order-toast.show { display:inline-block; }
     .row-actions button { margin-right:.4rem; font-size:.8rem; padding:.35rem .6rem; }
 
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:100; }
@@ -43,23 +56,92 @@
     .upload-status { font-size:.8rem; color:var(--text-muted,#888); margin-top:.35rem; }
     .modal-footer { display:flex; justify-content:flex-end; gap:.6rem; margin-top:1.5rem; }
     .form-error { color:#c0392b; font-size:.85rem; margin-bottom:.75rem; }
+    /* Tab navigation */
+    .admin-tabs { display:flex; gap:.5rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border,#eee); padding-bottom:0; }
+    .admin-tab-btn { padding:.55rem 1.2rem; border-radius:8px 8px 0 0; border:1px solid transparent; font-size:.9rem; font-weight:500; color:#888; cursor:pointer; background:none; transition:all .2s; }
+    .admin-tab-btn.active { background:var(--surface,#fff); border-color:var(--border,#eee); border-bottom-color:var(--surface,#fff); color:var(--text,#222); margin-bottom:-1px; }
+    .admin-tab-panel { display:none; }
+    .admin-tab-panel.active { display:block; }
+    /* Settings form */
+    .settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem 2rem; max-width:600px; }
+    .settings-grid .field { margin-bottom:0; }
+    .settings-section-title { font-size:.75rem; text-transform:uppercase; letter-spacing:.09em; color:#999; margin:1.5rem 0 .75rem; grid-column:1/-1; font-weight:600; }
+    #settings-status { font-size:.85rem; padding:.4rem 0; min-height:1.4rem; }
   </style>
 </head>
 <body>
   <div class="admin-header">
-    <h1>Products</h1>
+    <h1>Admin</h1>
     <div class="admin-actions">
       <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
       <button class="btn" id="logout-btn">Log out</button>
     </div>
   </div>
 
-  <table>
-    <thead>
-      <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Featured</th><th>Status</th><th></th></tr>
-    </thead>
-    <tbody id="product-rows"></tbody>
-  </table>
+  <!-- Tab bar -->
+  <div class="admin-tabs">
+    <button class="admin-tab-btn active" data-tab="products">Products</button>
+    <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
+  </div>
+
+  <!-- Products panel -->
+  <div class="admin-tab-panel active" id="tab-products">
+
+    <table>
+      <thead>
+        <tr><th style="width:36px"></th><th></th><th>Name</th><th>Category</th><th>Price</th><th>Featured</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody id="product-rows"></tbody>
+    </table>
+    <div style="margin-top:.75rem; display:flex; align-items:center; gap:.75rem;">
+      <span id="order-toast">Order saved ✓</span>
+    </div>
+  </div><!-- /tab-products -->
+
+  <!-- Settings panel -->
+  <div class="admin-tab-panel" id="tab-settings">
+    <form id="settings-form" style="background:var(--surface,#fff);border-radius:10px;padding:1.5rem 2rem;max-width:640px;">
+      <h2 style="font-size:1.1rem;margin-top:0;margin-bottom:1.25rem;">Site Settings</h2>
+      <div class="settings-grid">
+        <span class="settings-section-title">Contact &amp; Social</span>
+        <div class="field">
+          <label>WhatsApp Number <small style="color:#999;">(with country code, no +)</small></label>
+          <input type="text" id="s-whatsapp" placeholder="918435588589" />
+        </div>
+        <div class="field">
+          <label>Instagram Handle <small style="color:#999;">(without @)</small></label>
+          <input type="text" id="s-instagram" placeholder="crafting_tales_by_vaishnavi" />
+        </div>
+        <span class="settings-section-title">Currency</span>
+        <div class="field">
+          <label>Currency Symbol</label>
+          <input type="text" id="s-currency" placeholder="₹" style="max-width:80px;" />
+        </div>
+        <div></div>
+        <span class="settings-section-title">Timelines (days)</span>
+        <div class="field">
+          <label>Processing — Min days</label>
+          <input type="number" id="s-proc-min" min="1" max="60" />
+        </div>
+        <div class="field">
+          <label>Processing — Max days</label>
+          <input type="number" id="s-proc-max" min="1" max="60" />
+        </div>
+        <div class="field">
+          <label>Delivery — Min days</label>
+          <input type="number" id="s-del-min" min="1" max="60" />
+        </div>
+        <div class="field">
+          <label>Delivery — Max days</label>
+          <input type="number" id="s-del-max" min="1" max="60" />
+        </div>
+      </div>
+      <div style="margin-top:1.5rem;display:flex;align-items:center;gap:1rem;">
+        <button type="submit" class="btn btn-primary" id="settings-save-btn">Save Settings</button>
+        <span id="settings-status"></span>
+      </div>
+    </form>
+  </div><!-- /tab-settings -->
 
   <!-- Edit/Add modal -->
   <div class="overlay" id="modal-overlay"></div>

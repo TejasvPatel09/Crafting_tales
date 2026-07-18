@@ -6,13 +6,27 @@
   let editingId = null; // null = creating new
   let mediaItems = []; // [{type, src}]
 
+  // Drag-to-reorder state
+  let dragSrcId = null;
+
   document.addEventListener('DOMContentLoaded', async () => {
     const session = await requireAdminSession();
     if (!session) return;
     wireLogoutButton();
 
+    // Tab switcher
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.admin-tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
     await loadCategories();
     await loadProducts();
+    await loadSettings();
     renderTable();
 
     document.getElementById('add-product-btn').addEventListener('click', () => openModal(null));
@@ -23,6 +37,7 @@
       document.getElementById('custom-label-field').hidden = !e.target.checked;
     });
     document.getElementById('f-media-upload').addEventListener('change', onFilesChosen);
+    document.getElementById('settings-form').addEventListener('submit', saveSettings);
   });
 
   async function loadCategories() {
@@ -39,31 +54,159 @@
     products = data;
   }
 
+  /* ============================================================
+     TABLE RENDER
+     ============================================================ */
   function renderTable() {
     const tbody = document.getElementById('product-rows');
     tbody.innerHTML = products.map(p => {
       const d = p.data;
       const thumb = (d.media && d.media[0] && d.media[0].type === 'image') ? d.media[0].src : '';
       const catLabel = (categories.find(c => c.slug === p.category) || {}).label || p.category;
+      const isDelisted = p.status === 'delisted';
       return `
-        <tr data-id="${p.id}">
+        <tr data-id="${p.id}" draggable="true">
+          <td><span class="drag-handle" title="Drag to reorder">☰</span></td>
           <td>${thumb ? `<img class="thumb" src="${escapeAttr(thumb)}" />` : ''}</td>
-          <td>${escapeHtml(d.name)}</td>
+          <td>${escapeHtml(d.name)}${isDelisted ? ' <em style="color:#999;font-size:.78rem;">(delisted)</em>' : ''}</td>
           <td>${escapeHtml(catLabel)}</td>
           <td>₹${Number(d.price).toLocaleString('en-IN')}</td>
           <td>${p.featured ? '★' : ''}</td>
           <td><span class="pill pill-${p.status}">${p.status}</span></td>
           <td class="row-actions">
             <button class="btn edit-btn" data-id="${p.id}">Edit</button>
-            <button class="btn delete-btn" data-id="${p.id}">Delete</button>
+            ${isDelisted
+              ? `<button class="btn btn-primary relist-btn" data-id="${p.id}" style="font-size:.8rem;padding:.35rem .6rem;">Re-list</button>`
+              : `<button class="btn btn-delist delist-btn" data-id="${p.id}">Delist</button>`
+            }
+            <button class="btn delete-btn" data-id="${p.id}" style="color:#b33636;border-color:#f5c2c2;" title="Permanently delete">✕</button>
           </td>
         </tr>`;
     }).join('');
 
+    // Action buttons
     tbody.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
-    tbody.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', () => onDelete(b.dataset.id)));
+    tbody.querySelectorAll('.delist-btn').forEach(b => b.addEventListener('click', () => onDelist(b.dataset.id)));
+    tbody.querySelectorAll('.relist-btn').forEach(b => b.addEventListener('click', () => onRelist(b.dataset.id)));
+    tbody.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', () => onHardDelete(b.dataset.id)));
+
+    // Drag-to-reorder events
+    tbody.querySelectorAll('tr[draggable]').forEach(tr => {
+      tr.addEventListener('dragstart', onDragStart);
+      tr.addEventListener('dragover', onDragOver);
+      tr.addEventListener('dragleave', onDragLeave);
+      tr.addEventListener('drop', onDrop);
+      tr.addEventListener('dragend', onDragEnd);
+    });
   }
 
+  /* ============================================================
+     SOFT DELETE / RELIST
+     ============================================================ */
+  async function onDelist(id) {
+    if (!confirm('Delist this product? It will be hidden from the store but kept in the database. You can re-list it anytime.')) return;
+    const { error } = await sb.from('products').update({ status: 'delisted', updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) { alert('Failed to delist: ' + error.message); return; }
+    await loadProducts();
+    renderTable();
+  }
+
+  async function onRelist(id) {
+    if (!confirm('Re-list this product? It will become visible on the store again.')) return;
+    const { error } = await sb.from('products').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) { alert('Failed to re-list: ' + error.message); return; }
+    await loadProducts();
+    renderTable();
+  }
+
+  async function onHardDelete(id) {
+    const name = (products.find(p => p.id === id)?.data?.name) || id;
+    if (!confirm(`⚠️ PERMANENTLY delete "${name}"?\n\nThis cannot be undone — the product and all its data will be removed from the database forever.`)) return;
+    const { error } = await sb.from('products').delete().eq('id', id);
+    if (error) { alert('Failed to delete: ' + error.message); return; }
+    await loadProducts();
+    renderTable();
+  }
+
+  /* ============================================================
+     DRAG-TO-REORDER
+     ============================================================ */
+  function onDragStart(e) {
+    dragSrcId = this.dataset.id;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragSrcId);
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (this.dataset.id !== dragSrcId) {
+      this.classList.add('drag-over');
+    }
+  }
+
+  function onDragLeave() {
+    this.classList.remove('drag-over');
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    const targetId = this.dataset.id;
+    if (!dragSrcId || dragSrcId === targetId) return;
+
+    // Reorder products array
+    const srcIdx = products.findIndex(p => p.id === dragSrcId);
+    const tgtIdx = products.findIndex(p => p.id === targetId);
+    if (srcIdx === -1 || tgtIdx === -1) return;
+
+    const [moved] = products.splice(srcIdx, 1);
+    products.splice(tgtIdx, 0, moved);
+
+    renderTable();
+    persistOrder();
+  }
+
+  function onDragEnd() {
+    document.querySelectorAll('#product-rows tr').forEach(tr => {
+      tr.classList.remove('dragging', 'drag-over');
+    });
+    dragSrcId = null;
+  }
+
+  async function persistOrder() {
+    const toast = document.getElementById('order-toast');
+    if (toast) { toast.classList.remove('show'); toast.textContent = 'Saving…'; toast.style.color = '#777'; toast.style.background = '#f5f5f5'; toast.style.borderColor = '#ddd'; toast.classList.add('show'); }
+
+    try {
+      await Promise.all(
+        products.map((p, i) =>
+          sb.from('products').update({ sort_order: i + 1 }).eq('id', p.id)
+        )
+      );
+      if (toast) {
+        toast.textContent = 'Order saved ✓';
+        toast.style.color = '#1e7b34';
+        toast.style.background = '#e6f4ea';
+        toast.style.borderColor = '#b7dfbf';
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to save order:', err);
+      if (toast) {
+        toast.textContent = 'Failed to save order — try again.';
+        toast.style.color = '#b33636';
+        toast.style.background = '#fbe4e4';
+        toast.style.borderColor = '#f5c2c2';
+        setTimeout(() => toast.classList.remove('show'), 4000);
+      }
+    }
+  }
+
+  /* ============================================================
+     MODAL — OPEN / CLOSE
+     ============================================================ */
   function openModal(id) {
     editingId = id;
     document.getElementById('form-error').textContent = '';
@@ -106,17 +249,44 @@
     document.getElementById('product-modal').classList.remove('open');
   }
 
+  /* ============================================================
+     MEDIA LIST
+     ============================================================ */
   function renderMediaList() {
     const list = document.getElementById('media-list');
     list.innerHTML = mediaItems.map((m, i) => `
-      <div class="media-item">
+      <div class="media-item" draggable="true" data-idx="${i}" style="cursor:grab;">
         ${m.type === 'video' ? `<video src="${escapeAttr(m.src)}" muted></video>` : `<img src="${escapeAttr(m.src)}" />`}
         <button type="button" data-idx="${i}" class="remove-media-btn">×</button>
       </div>
     `).join('');
+
+    // Remove buttons
     list.querySelectorAll('.remove-media-btn').forEach(b => {
       b.addEventListener('click', () => {
         mediaItems.splice(Number(b.dataset.idx), 1);
+        renderMediaList();
+      });
+    });
+
+    // Drag-to-reorder within media list
+    let dragSrcIdx = null;
+    list.querySelectorAll('.media-item[draggable]').forEach(item => {
+      item.addEventListener('dragstart', () => {
+        dragSrcIdx = Number(item.dataset.idx);
+        item.style.opacity = '0.4';
+      });
+      item.addEventListener('dragend', () => { item.style.opacity = ''; });
+      item.addEventListener('dragover', e => { e.preventDefault(); item.style.outline = '2px solid #C69C6D'; });
+      item.addEventListener('dragleave', () => { item.style.outline = ''; });
+      item.addEventListener('drop', e => {
+        e.preventDefault();
+        item.style.outline = '';
+        const tgtIdx = Number(item.dataset.idx);
+        if (dragSrcIdx === null || dragSrcIdx === tgtIdx) return;
+        const [moved] = mediaItems.splice(dragSrcIdx, 1);
+        mediaItems.splice(tgtIdx, 0, moved);
+        dragSrcIdx = null;
         renderMediaList();
       });
     });
@@ -146,6 +316,9 @@
     e.target.value = '';
   }
 
+  /* ============================================================
+     SAVE (CREATE / UPDATE)
+     ============================================================ */
   async function onSave(e) {
     e.preventDefault();
     const errEl = document.getElementById('form-error');
@@ -218,12 +391,47 @@
     closeModal();
   }
 
-  async function onDelete(id) {
-    if (!confirm('Delete this product? This cannot be undone.')) return;
-    const { error } = await sb.from('products').delete().eq('id', id);
-    if (error) { alert('Failed to delete: ' + error.message); return; }
-    await loadProducts();
-    renderTable();
+  /* ============================================================
+     HELPERS
+     ============================================================ */
+  async function loadSettings() {
+    const { data, error } = await sb.from('site_settings').select('*').eq('id', 1).single();
+    if (error) { console.error('Settings load error:', error); return; }
+    document.getElementById('s-whatsapp').value  = data.whatsapp || '';
+    document.getElementById('s-instagram').value = data.instagram || '';
+    document.getElementById('s-currency').value  = data.currency || '\u20b9';
+    document.getElementById('s-proc-min').value  = data.processing_days_min || 15;
+    document.getElementById('s-proc-max').value  = data.processing_days_max || 20;
+    document.getElementById('s-del-min').value   = data.delivery_days_min || 7;
+    document.getElementById('s-del-max').value   = data.delivery_days_max || 10;
+  }
+
+  async function saveSettings(e) {
+    e.preventDefault();
+    const statusEl = document.getElementById('settings-status');
+    const btn = document.getElementById('settings-save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    statusEl.textContent = '';
+    const payload = {
+      whatsapp:             document.getElementById('s-whatsapp').value.trim(),
+      instagram:            document.getElementById('s-instagram').value.trim(),
+      currency:             document.getElementById('s-currency').value.trim() || '\u20b9',
+      processing_days_min:  Number(document.getElementById('s-proc-min').value),
+      processing_days_max:  Number(document.getElementById('s-proc-max').value),
+      delivery_days_min:    Number(document.getElementById('s-del-min').value),
+      delivery_days_max:    Number(document.getElementById('s-del-max').value),
+      updated_at:           new Date().toISOString()
+    };
+    const { error } = await sb.from('site_settings').update(payload).eq('id', 1);
+    btn.disabled = false; btn.textContent = 'Save Settings';
+    if (error) {
+      statusEl.textContent = '❌ ' + error.message;
+      statusEl.style.color = '#b33636';
+    } else {
+      statusEl.textContent = '✓ Settings saved!';
+      statusEl.style.color = '#1e7b34';
+      setTimeout(() => statusEl.textContent = '', 3000);
+    }
   }
 
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }

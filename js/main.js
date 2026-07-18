@@ -76,7 +76,7 @@
 
   function mediaThumbHTML(m) {
     if (m.type === 'video' || isVideo(m.src)) {
-      return `<video src="${url(m.src)}" muted loop playsinline preload="metadata"></video>`;
+      return `<video data-src="${url(m.src)}" muted loop playsinline preload="none"></video>`;
     }
     return `<img src="${url(m.src)}" alt="" loading="lazy" />`;
   }
@@ -88,6 +88,7 @@
 
   async function init() {
     initTheme();
+    renderSkeletons();
     await loadData();
     PRODUCTS.forEach(p => (byId[p.id] = p));
     renderCurated();
@@ -102,6 +103,11 @@
     updateWishlistUI();
     wireWhatsAppLinks();
     initScrollReveal();
+    initMobileNav();
+    initLazyMedia();
+    initHeroWordReveal();
+    initHeroParticles();
+    initCursorTrail();
     const yearEl = $('#year'); if (yearEl) yearEl.textContent = new Date().getFullYear();
     checkUrlForProduct();
     window.addEventListener('popstate', (e) => {
@@ -217,7 +223,11 @@
       card.style.animationDelay = (i * 0.04) + 's';
       grid.appendChild(card);
     });
-    if (empty) empty.hidden = list.length > 0;
+    if (empty) {
+      empty.hidden = list.length > 0;
+      empty.textContent = 'No pieces in this category yet.';
+    }
+    initLazyMedia();
   }
 
   function initCatalogEvents() {
@@ -254,13 +264,67 @@
 
     card.querySelectorAll('[data-open]').forEach(el => el.addEventListener('click', () => openProduct(p.id)));
     card.querySelector('[data-wish]').addEventListener('click', e => { e.stopPropagation(); toggleWishlist(p.id); });
-    card.querySelector('[data-add]').addEventListener('click', e => {
+    const addBtn = card.querySelector('[data-add]');
+    addBtn.addEventListener('click', e => {
       e.stopPropagation();
+      spawnRipple(addBtn, e);
       // Products needing a choice (variant or custom photo) open the modal instead of blind-adding.
       if (p.variants || p.customizable) { openProduct(p.id); }
       else { addToCart(p, {}); }
     });
+    attachTilt(card);
     return card;
+  }
+
+  /* ============================================================
+     3D CARD TILT  (Feature 1)
+     ============================================================ */
+  function attachTilt(card) {
+    // Disabled on touch / coarse pointers.
+    if (window.matchMedia('(hover: none), (pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let raf = null;
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;   // -0.5 .. 0.5
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.classList.add('is-tilting');
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        card.style.transform =
+          `perspective(700px) rotateY(${x * 14}deg) rotateX(${-y * 10}deg) translateY(-6px)`;
+        card.style.boxShadow = `${-x * 22}px ${y * 22 + 12}px 44px rgba(26,16,8,0.20)`;
+      });
+    });
+    card.addEventListener('mouseleave', () => {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      card.classList.remove('is-tilting');
+      card.style.transform = '';
+      card.style.boxShadow = '';
+    });
+  }
+
+  /* ============================================================
+     ADD-TO-CART RIPPLE  (Feature 7)
+     ============================================================ */
+  function spawnRipple(btn, e) {
+    const r = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.left = (e.clientX - r.left) + 'px';
+    ripple.style.top = (e.clientY - r.top) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  }
+
+  function bounceCartBadge() {
+    const badge = $('#cart-count');
+    if (!badge) return;
+    badge.classList.remove('bounce');
+    // Force reflow so the animation can retrigger on rapid adds.
+    void badge.offsetWidth;
+    badge.classList.add('bounce');
   }
 
   /* ============================================================
@@ -278,11 +342,12 @@
     $('#pd-qty-minus')?.addEventListener('click', () => { if (curQty > 1) { curQty--; syncQty(); } });
     $('#pd-qty-plus')?.addEventListener('click', () => { curQty++; syncQty(); });
 
-    $('#pd-add-btn')?.addEventListener('click', addFromModal);
+    $('#pd-add-btn')?.addEventListener('click', e => { spawnRipple(e.currentTarget, e); addFromModal(); });
     $('#pd-order-wa-btn')?.addEventListener('click', orderDirectWhatsApp);
-    $('#sticky-add-btn')?.addEventListener('click', addFromModal);
+    $('#sticky-add-btn')?.addEventListener('click', e => { spawnRipple(e.currentTarget, e); addFromModal(); });
     $('#sticky-wa-btn')?.addEventListener('click', orderDirectWhatsApp);
     $('#pd-wish-btn')?.addEventListener('click', () => current && toggleWishlist(current.id, true));
+    $('#pd-share-btn')?.addEventListener('click', shareProduct);
 
     // Tabs
     document.querySelectorAll('.pd-tab-btn').forEach(btn => {
@@ -457,13 +522,30 @@
 
   function setStage(m) {
     const stage = $('#pd-stage');
+    // Reset zoom
+    stage.classList.remove('zoom-active');
     if (m.type === 'video') {
       stage.innerHTML = `<video src="${url(m.src)}" autoplay muted loop playsinline controls></video>`;
       stage.style.cursor = 'default';
     } else {
-      stage.innerHTML = `<img src="${url(m.src)}" alt="${esc(current.name)}" /><span class="zoom-hint">Click to zoom</span>`;
-      stage.style.cursor = 'zoom-in';
-      stage.querySelector('img').addEventListener('click', () => openLightbox(m));
+      stage.innerHTML = `<img src="${url(m.src)}" alt="${esc(current.name)}" />`;
+      stage.style.cursor = '';
+      const img = stage.querySelector('img');
+      // Hover zoom — desktop only
+      stage.addEventListener('mouseenter', () => { stage.classList.add('zoom-active'); });
+      stage.addEventListener('mouseleave', () => {
+        stage.classList.remove('zoom-active');
+        img.style.transformOrigin = 'center center';
+      });
+      stage.addEventListener('mousemove', e => {
+        if (!stage.classList.contains('zoom-active')) return;
+        const rect = stage.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+        const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+        img.style.transformOrigin = `${x}% ${y}%`;
+      });
+      // Click opens lightbox for full-screen view
+      img.addEventListener('click', () => openLightbox(m));
     }
   }
 
@@ -561,6 +643,7 @@
     }
     persistCart();
     updateCartUI();
+    bounceCartBadge();
     openCart();
     toast(`${p.name} added to cart`);
   }
@@ -743,6 +826,12 @@
       link.target = '_blank';
       link.rel = 'noopener';
     }
+    // Floating WhatsApp button (Feature 2)
+    const fab = $('#wa-fab');
+    if (fab) {
+      fab.href = `https://wa.me/${SETTINGS.whatsapp}`;
+      requestAnimationFrame(() => fab.classList.add('ready'));
+    }
   }
 
   /* ============================================================
@@ -799,6 +888,37 @@
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
     document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => obs.observe(el));
+
+    initInkWipe();
+  }
+
+  /* ============================================================
+     INK BLEED / WATERCOLOR WIPE  (Feature 6)
+     A separate overlay child slides away — leaves the paper's
+     torn-edge clip-path and tape ::before/::after untouched.
+     ============================================================ */
+  function initInkWipe() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const papers = document.querySelectorAll('.scrapbook-paper');
+    if (!papers.length) return;
+
+    const wipeObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('wiped');
+          wipeObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18, rootMargin: '0px 0px -60px 0px' });
+
+    papers.forEach(paper => {
+      const overlay = document.createElement('div');
+      overlay.className = 'wipe-overlay';
+      // Keep the overlay clipped to the torn-edge shape of its parent.
+      paper.appendChild(overlay);
+      if (reduce) { overlay.classList.add('wiped'); return; }
+      wipeObs.observe(overlay);
+    });
   }
 
   /* ============================================================
@@ -814,6 +934,222 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
   }
 
+  async function shareProduct() {
+    if (!current) return;
+    const shareUrl = window.location.origin + window.location.pathname + '?p=' + current.id;
+    const btn = $('#pd-share-btn');
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: current.name, text: current.description, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast('Link copied to clipboard!');
+        if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 2000); }
+      }
+    } catch (e) {
+      // User cancelled share or clipboard blocked
+      if (e.name !== 'AbortError') {
+        const el = document.createElement('input');
+        el.value = shareUrl;
+        document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+        toast('Link copied!');
+      }
+    }
+  }
+
+  /* ============================================================
+     MOBILE NAV
+     ============================================================ */
+  function initMobileNav() {
+    const btn = $('#nav-toggle-btn');
+    const nav = $('#mobile-nav');
+    const overlay = $('#mobile-nav-overlay');
+    if (!btn || !nav) return;
+
+    function openNav() {
+      btn.classList.add('open');
+      nav.classList.add('open');
+      overlay.classList.add('open');
+      nav.setAttribute('aria-hidden', 'false');
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeNav() {
+      btn.classList.remove('open');
+      nav.classList.remove('open');
+      overlay.classList.remove('open');
+      nav.setAttribute('aria-hidden', 'true');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    btn.addEventListener('click', () => nav.classList.contains('open') ? closeNav() : openNav());
+    overlay.addEventListener('click', closeNav);
+    nav.querySelectorAll('.mobile-nav-link').forEach(a => a.addEventListener('click', closeNav));
+  }
+
+  /* ============================================================
+     LOADING SKELETON CARDS  (Feature 8)
+     ============================================================ */
+  function renderSkeletons(n = 8) {
+    const grid = $('#product-grid');
+    if (!grid) return;
+    grid.innerHTML = Array.from({ length: n }, () => `
+      <div class="product-card skeleton-card" aria-hidden="true">
+        <div class="skeleton skeleton-media"></div>
+        <div class="card-info">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-price"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  /* ============================================================
+     HERO WORD-BY-WORD REVEAL  (Feature 3, GSAP)
+     ============================================================ */
+  function initHeroWordReveal() {
+    const tagline = document.querySelector('.hero-tagline');
+    if (!tagline || typeof gsap === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const words = tagline.textContent.trim().split(/\s+/);
+    tagline.innerHTML = words.map(w => `<span class="hero-word">${esc(w)}</span>`).join(' ');
+
+    gsap.from('.hero-word', {
+      opacity: 0, y: 36, rotateX: -25,
+      stagger: 0.07, duration: 0.75,
+      ease: 'power3.out', delay: 0.3
+    });
+    gsap.from('.hero-eyebrow', { opacity: 0, y: 14, duration: 0.6, delay: 0.1 });
+    gsap.from('.hero-cta', { opacity: 0, y: 14, duration: 0.6, delay: 0.9 });
+  }
+
+  /* ============================================================
+     GOLD DUST PARTICLES  (Feature 4)
+     ============================================================ */
+  function initHeroParticles() {
+    const canvas = $('#hero-particles');
+    const host = document.querySelector('.hero-visual');
+    if (!canvas || !host) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { canvas.remove(); return; }
+
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let w = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function resize() {
+      const r = host.getBoundingClientRect();
+      w = r.width * 1.4;
+      h = r.height * 1.4;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function seed() {
+      // Deterministic-ish scatter without Math.random dependency issues.
+      particles = Array.from({ length: 28 }, (_, i) => {
+        const rnd = (n) => (Math.sin((i + 1) * n) * 0.5 + 0.5);
+        return {
+          x: rnd(12.9898) * w,
+          y: rnd(78.233) * h,
+          r: 1.8 + rnd(43.11) * 3.2,
+          vy: 0.18 + rnd(21.7) * 0.4,
+          vx: (rnd(9.13) - 0.5) * 0.3,
+          baseOp: 0.45 + rnd(4.7) * 0.5,
+          phase: rnd(31.4) * Math.PI * 2,
+          light: rnd(7.77) // 0..1 → mix between deep gold and bright champagne
+        };
+      });
+    }
+
+    let t = 0;
+    function frame() {
+      ctx.clearRect(0, 0, w, h);
+      t += 0.02;
+      particles.forEach(p => {
+        p.y -= p.vy;
+        p.x += p.vx;
+        if (p.y < -6) { p.y = h + 6; }
+        if (p.x < -6) p.x = w + 6;
+        if (p.x > w + 6) p.x = -6;
+        const flicker = 0.6 + 0.4 * Math.sin(t + p.phase);
+        // Brighter champagne-gold for lighter particles, deep gold for the rest
+        const col = p.light > 0.5 ? '236,205,155' : '198,156,109';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${col},${(p.baseOp * flicker).toFixed(3)})`;
+        ctx.shadowColor = `rgba(${col},0.85)`;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+      });
+      ctx.shadowBlur = 0;
+      raf = requestAnimationFrame(frame);
+    }
+
+    let raf;
+    resize();
+    seed();
+    frame();
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { resize(); seed(); }, 150);
+    }, { passive: true });
+  }
+
+  /* ============================================================
+     CURSOR TRAIL (GOLD GLOW)  (Feature 5)
+     ============================================================ */
+  function initCursorTrail() {
+    const dot = $('#cursor-dot');
+    if (!dot) return;
+    // any-hover/any-pointer: touchscreen laptops report the PRIMARY pointer as
+    // coarse, which would wrongly remove the trail even when a mouse is attached.
+    if (!window.matchMedia('(any-hover: hover) and (any-pointer: fine)').matches) { dot.remove(); return; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { dot.remove(); return; }
+
+    let cx = 0, cy = 0, tx = 0, ty = 0, seen = false;
+    document.addEventListener('mousemove', e => {
+      tx = e.clientX; ty = e.clientY;
+      if (!seen) { cx = tx; cy = ty; seen = true; dot.classList.add('active'); }
+    }, { passive: true });
+    document.addEventListener('mouseleave', () => dot.classList.remove('active'));
+    document.addEventListener('mouseenter', () => { if (seen) dot.classList.add('active'); });
+
+    function animate() {
+      cx += (tx - cx) * 0.12;
+      cy += (ty - cy) * 0.12;
+      dot.style.transform = `translate(${cx - 20}px, ${cy - 20}px)`;
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
+
+  /* ============================================================
+     LAZY-LOAD VIDEOS
+     ============================================================ */
+  function initLazyMedia() {
+    const lazyVideos = document.querySelectorAll('video[data-src]');
+    if (!lazyVideos.length) return;
+
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const v = entry.target;
+            v.src = v.dataset.src;
+            v.removeAttribute('data-src');
+            v.load();
+            obs.unobserve(v);
+          }
+        });
+      }, { rootMargin: '200px' });
+      lazyVideos.forEach(v => obs.observe(v));
+    } else {
+      // Fallback: load immediately
+      lazyVideos.forEach(v => { v.src = v.dataset.src; v.removeAttribute('data-src'); });
+    }
+  }
+
 })();
-
-
