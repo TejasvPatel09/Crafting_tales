@@ -225,6 +225,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   background: transparent;
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden; /* Prevent animations like .wipe-overlay from expanding page width */
 }
 
 /* ============================================================
@@ -1093,25 +1094,25 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   .craft-media { order: -1; }
   .footer-inner { grid-template-columns: 1fr; }
   .footer-cols { flex-wrap: wrap; gap: 1.5rem; }
-  .pd-body { grid-template-columns: 1fr; }
+  .pd-body { grid-template-columns: 1fr; align-content: start; }
   /* Gallery scrolls away with the page (not stuck) and is capped so the
      product details get real room instead of being pushed off-screen. */
-  .pd-gallery { position: static; height: auto; padding: 0.5rem 0.5rem 0; }
-  .pd-stage { flex: none; height: auto; aspect-ratio: 1; max-height: 280px; width: 100%; max-width: 280px; margin: 0 auto; }
-  .pd-thumbs { justify-content: center; }
+  .pd-gallery { position: static !important; height: auto !important; padding: 0.5rem 0.5rem 0 !important; }
+  .pd-stage { flex: none !important; height: auto !important; aspect-ratio: 1 !important; max-height: 280px !important; width: 100% !important; max-width: 280px !important; margin: 0 auto !important; }
+  .pd-thumbs { justify-content: center !important; }
 
   /* ---- Product Modal: Bottom sheet on mobile (fits content height) ---- */
   .product-modal {
-    inset: auto 0 0 0;
-    margin: 0;
-    max-height: 90vh;
-    border-radius: 1.25rem 1.25rem 0 0;
-    transform: translateY(100%);
-    opacity: 1; /* Slide up instead of fade+scale */
-    transition: transform 0.38s var(--ease);
+    inset: auto 0 0 0 !important;
+    margin: 0 !important;
+    max-height: 90vh !important;
+    border-radius: 1.25rem 1.25rem 0 0 !important;
+    transform: translateY(100%) !important;
+    opacity: 1 !important; /* Slide up instead of fade+scale */
+    transition: transform 0.38s var(--ease) !important;
   }
-  .product-modal.open { transform: translateY(0); opacity: 1; }
-  .pd-body { height: auto; max-height: 90vh; }
+  .product-modal.open { transform: translateY(0) !important; opacity: 1 !important; pointer-events: auto !important; }
+  .pd-body { height: auto !important; max-height: 90vh !important; }
 
   /* ---- Drawers: full-screen bottom sheet on mobile ---- */
   .drawer {
