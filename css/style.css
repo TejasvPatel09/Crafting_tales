@@ -1100,6 +1100,19 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   .pd-stage { flex: none; height: auto; aspect-ratio: 1; max-height: 280px; width: 100%; max-width: 280px; margin: 0 auto; }
   .pd-thumbs { justify-content: center; }
 
+  /* ---- Product Modal: Bottom sheet on mobile (fits content height) ---- */
+  .product-modal {
+    inset: auto 0 0 0;
+    margin: 0;
+    max-height: 90vh;
+    border-radius: 1.25rem 1.25rem 0 0;
+    transform: translateY(100%);
+    opacity: 1; /* Slide up instead of fade+scale */
+    transition: transform 0.38s var(--ease);
+  }
+  .product-modal.open { transform: translateY(0); opacity: 1; }
+  .pd-body { height: auto; max-height: 90vh; }
+
   /* ---- Drawers: full-screen bottom sheet on mobile ---- */
   .drawer {
     top: auto;
