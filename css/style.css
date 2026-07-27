@@ -350,7 +350,11 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   animation: floatAnim 6s ease-in-out infinite;
 }
 
-/* Hero float animation runs on ALL screen sizes (was previously desktop-disabled) */
+@media (min-width: 768px) {
+  .hero-circle {
+    animation: none;
+  }
+}
 @keyframes floatAnim {
   0% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
@@ -1092,8 +1096,9 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   .pd-body { grid-template-columns: 1fr; }
   /* Gallery scrolls away with the page (not stuck) and is capped so the
      product details get real room instead of being pushed off-screen. */
-  .pd-gallery { position: static; height: auto; padding: 1rem 1rem 0; }
-  .pd-stage { flex: none; height: 35vh; max-height: 320px; }
+  .pd-gallery { position: static; height: auto; padding: 0.5rem 0.5rem 0; }
+  .pd-stage { flex: none; height: auto; aspect-ratio: 1; max-height: 280px; width: 100%; max-width: 280px; margin: 0 auto; }
+  .pd-thumbs { justify-content: center; }
 
   /* ---- Drawers: full-screen bottom sheet on mobile ---- */
   .drawer {
@@ -1323,7 +1328,7 @@ body::before {
   inset: -20%;
   width: 140%; height: 140%;
   pointer-events: none;
-  z-index: 3;
+  z-index: 10;
 }
 
 /* --- 5. CURSOR TRAIL (GOLD GLOW) ---------------------------- */

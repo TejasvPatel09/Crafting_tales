@@ -1038,9 +1038,9 @@
     let w = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     function resize() {
-      const r = host.getBoundingClientRect();
-      w = r.width * 1.4;
-      h = r.height * 1.4;
+      const targetRect = (document.querySelector('.hero-circle') || host).getBoundingClientRect();
+      w = targetRect.width * 1.4;
+      h = targetRect.height * 1.4;
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
