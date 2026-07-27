@@ -1104,6 +1104,8 @@
   function initCursorTrail() {
     const dot = $('#cursor-dot');
     if (!dot) return;
+    // Skip on small screens — cursor glow is irrelevant on mobile / touch.
+    if (window.innerWidth <= 768) { dot.style.display = 'none'; return; }
     // any-hover/any-pointer: touchscreen laptops report the PRIMARY pointer as
     // coarse, which would wrongly remove the trail even when a mouse is attached.
     if (!window.matchMedia('(any-hover: hover) and (any-pointer: fine)').matches) { dot.remove(); return; }
